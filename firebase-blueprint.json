@@ -1,0 +1,168 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A flower bouquet or item available in the boutique search catalog.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique product identifier"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the bouquet"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the flowers used and emotional vibe"
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the product in Rubles"
+        },
+        "imageSrc": {
+          "type": "string",
+          "description": "Public URL or base64 data string of the product photo"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the flower (roses, Author, spring, boxes, etc.)"
+        },
+        "composition": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Individual flower ingredients and counts"
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Searching markers like rose, red, box, etc."
+        },
+        "rating": {
+          "type": "number",
+          "description": "Customer average rating from 1 to 5"
+        },
+        "popular": {
+          "type": "boolean",
+          "description": "Whether is featured on the main homepage section"
+        },
+        "imageClassName": {
+          "type": "string",
+          "description": "CSS classes for image positioning/zoom"
+        },
+        "order": {
+          "type": "number",
+          "description": "Display sort order index"
+        }
+      },
+      "required": ["id", "name", "price", "imageSrc", "category"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer feedback left on the website.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique review identifier"
+        },
+        "author": {
+          "type": "string",
+          "description": "Name of the customer"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Rating out of 5 stars"
+        },
+        "comment": {
+          "type": "string",
+          "description": "Comment left by the customer"
+        },
+        "date": {
+          "type": "string",
+          "description": "Formatted Russian display date"
+        }
+      },
+      "required": ["id", "author", "rating", "comment", "date"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A floral delivery or pickup order placed on the boutique website.",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "type": "string",
+          "description": "Six-digit human tracking identifier like ELZ-123456"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Name of client placing the order"
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Mobile contact number"
+        },
+        "deliveryType": {
+          "type": "string",
+          "enum": ["delivery", "pickup"],
+          "description": "Delivery type (pickup or dropoff)"
+        },
+        "address": {
+          "type": "string",
+          "description": "Shipping address target"
+        },
+        "date": {
+          "type": "string",
+          "description": "Date of requested handoff"
+        },
+        "time": {
+          "type": "string",
+          "description": "Time slot requested"
+        },
+        "cardMessage": {
+          "type": "string",
+          "description": "Kalligraphical card text addition"
+        },
+        "totalPrice": {
+          "type": "number",
+          "description": "Total checkout price in Rubles"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "assembling", "assembled", "delivering", "delivered", "cancelled"],
+          "description": "Current processing status"
+        },
+        "items": {
+          "type": "array",
+          "items": { "type": "object" },
+          "description": "Item items bought in this order"
+        },
+        "statusLog": {
+          "type": "array",
+          "items": { "type": "object" },
+          "description": "Historical status check points"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO creation timestamp"
+        }
+      },
+      "required": ["orderId", "customerName", "customerPhone", "deliveryType", "totalPrice", "items", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "products": {
+      "schema": "Product",
+      "description": "Public boutique catalog of active bouqets."
+    },
+    "reviews": {
+      "schema": "Review",
+      "description": "Public customer feedback entries."
+    },
+    "orders": {
+      "schema": "Order",
+      "description": "Active delivery list and tracking database."
+    }
+  }
+}

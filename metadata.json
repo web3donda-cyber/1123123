@@ -1,0 +1,6 @@
+{
+  "name": "Цветы Елизавета Челябинск",
+  "description": "Сайт доставки цветов «Елизавета» в Челябинске с умным подбором букетов.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

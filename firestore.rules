@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable utility helpers for verification and safety
+    function isValidId(id) {
+       return id is string && id.size() <= 256 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // PRODUCT SCHEMA AND FIELD VALIDATION GATE
+    function isValidProduct(data) {
+      return data.keys().hasAll(['id', 'name', 'price', 'imageSrc', 'category'])
+        && data.keys().size() <= 12
+        && data.id is string
+        && data.id.size() <= 100
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 200
+        && data.description is string
+        && data.description.size() <= 3000
+        && data.price is number
+        && data.price >= 0
+        && data.price <= 1000000
+        && data.imageSrc is string
+        && data.imageSrc.size() <= 2000000
+        && data.category is string
+        && data.category.size() <= 50
+        && data.composition is list
+        && data.composition.size() <= 100
+        && (data.composition.size() == 0 || data.composition[0] is string)
+        && data.tags is list
+        && data.tags.size() <= 100
+        && (data.tags.size() == 0 || data.tags[0] is string)
+        && data.rating is number
+        && data.rating >= 0
+        && data.rating <= 5
+        && (!data.keys().hasAny(['popular']) || data.popular is bool)
+        && (!data.keys().hasAny(['imageClassName']) || (data.imageClassName is string && data.imageClassName.size() <= 200))
+        && (!data.keys().hasAny(['order']) || data.order is number)
+    }
+
+    // REVIEW SCHEMA AND FIELD VALIDATION GATE
+    function isValidReview(data) {
+      return data.keys().hasAll(['id', 'author', 'rating', 'comment', 'date'])
+        && data.keys().size() == 5
+        && data.id is string
+        && data.id.size() <= 100
+        && data.author is string
+        && data.author.size() > 0
+        && data.author.size() <= 100
+        && data.rating is number
+        && data.rating >= 1
+        && data.rating <= 5
+        && data.comment is string
+        && data.comment.size() <= 1500
+        && data.date is string
+        && data.date.size() <= 100;
+    }
+
+    // CATEGORY SCHEMA AND FIELD VALIDATION GATE
+    function isValidCategory(data) {
+      return data.keys().hasAll(['id', 'label'])
+        && data.keys().size() == 2
+        && data.id is string
+        && data.id.size() <= 100
+        && data.label is string
+        && data.label.size() > 0
+        && data.label.size() <= 100;
+    }
+
+    // ORDER SCHEMA AND FIELD VALIDATION GATE
+    function isValidOrder(data) {
+      return data.keys().hasAll(['orderId', 'customerName', 'customerPhone', 'deliveryType', 'totalPrice', 'items', 'status', 'createdAt'])
+        && data.keys().size() <= 16
+        && data.orderId is string
+        && data.orderId.size() <= 15
+        && data.customerName is string
+        && data.customerName.size() > 0
+        && data.customerName.size() <= 150
+        && data.customerPhone is string
+        && data.customerPhone.size() > 0
+        && data.customerPhone.size() <= 40
+        && data.deliveryType is string
+        && (data.deliveryType == 'delivery' || data.deliveryType == 'pickup')
+        && data.totalPrice is number
+        && data.totalPrice >= 0
+        && data.totalPrice <= 5000000
+        && data.status is string
+        && (data.status == 'pending' || data.status == 'assembling' || data.status == 'assembled' || data.status == 'delivering' || data.status == 'delivered' || data.status == 'cancelled')
+        && data.createdAt is string
+        && data.createdAt.size() <= 100
+        && data.items is list
+        && data.items.size() <= 100
+        && (data.items.size() == 0 || data.items[0] is map)
+        && (!data.keys().hasAny(['address']) || (data.address is string && data.address.size() <= 500))
+        && (!data.keys().hasAny(['date']) || (data.date is string && data.date.size() <= 100))
+        && (!data.keys().hasAny(['time']) || (data.time is string && data.time.size() <= 100))
+        && (!data.keys().hasAny(['cardMessage']) || (data.cardMessage is string && data.cardMessage.size() <= 1000))
+        && (!data.keys().hasAny(['statusLog']) || (data.statusLog is list && data.statusLog.size() <= 50))
+        && (!data.keys().hasAny(['paymentMethod']) || (data.paymentMethod is string && data.paymentMethod.size() <= 100))
+        && (!data.keys().hasAny(['paymentStatus']) || (data.paymentStatus is string && data.paymentStatus.size() <= 100));
+    }
+
+    // Firestore Collections Matching
+    match /products/{productId} {
+      allow get, list: if true;
+      allow create: if isValidId(productId) && isValidProduct(request.resource.data);
+      allow update: if isValidId(productId) && isValidProduct(request.resource.data);
+      allow delete: if isValidId(productId);
+    }
+
+    match /reviews/{reviewId} {
+      allow get, list: if true;
+      allow create: if isValidId(reviewId) && isValidReview(request.resource.data);
+      allow update: if isValidId(reviewId) && isValidReview(request.resource.data);
+      allow delete: if isValidId(reviewId);
+    }
+
+    match /orders/{orderId} {
+      allow get, list: if true;
+      allow create: if isValidId(orderId) && isValidOrder(request.resource.data);
+      allow update: if isValidId(orderId) && isValidOrder(request.resource.data);
+      allow delete: if isValidId(orderId);
+    }
+
+    match /categories/{categoryId} {
+      allow get, list: if true;
+      allow create, update: if isValidId(categoryId) && isValidCategory(request.resource.data);
+      allow delete: if isValidId(categoryId);
+    }
+  }
+}
